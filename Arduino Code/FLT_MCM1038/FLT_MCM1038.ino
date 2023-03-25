@@ -19,12 +19,15 @@ SnoozeBlock config_teensy36(alarm);
 #define GPSSERIAL Serial1       // UBlox GPS is on Serial1
 TinyGPSPlus gps;
 
-// Change the flight number "nnnn_" and PIN_ID to the current flight number, example 1030 and 30
+// Change the flight number "nnnn_" and PIN_ID to the current flight number, example "1030" and 30
 // Note: for post processing reasons, make all APRS ASCII text message fields a fixed 8 characters long
-#define PRE_MSG   "1038_PRE"   // Flight name in APRS preflight mode message
-#define TRK_MSG   "1038_TRK"   // Flight name in APRS track mode message (sent every TRACK_APRS_TX_PERIOD)
-#define TRK_GPS   "1038_GPS"   // Flight name in APRS track mode GPS message (sent every TRACK_GPS_PERIOD)
-#define PING_ID 38             // Value (0-255)sent for ping Identification byte (last two digits of the flight number)
+#define FLIGHT_NUM "1038"         // MUST be 4 characters
+#define PING_ID    38             // Value (0-255)sent for ping Identification byte (last two digits of the flight number)
+
+#define HEL_MSG    FLIGHT_NUM"_HEL"   // Power on message says hello
+#define PRE_MSG    FLIGHT_NUM"_PRE"   // Flight name in APRS preflight mode message
+#define TRK_MSG    FLIGHT_NUM"_TRK"   // Flight name in APRS track mode message (sent every TRACK_APRS_TX_PERIOD)
+#define TRK_GPS    FLIGHT_NUM"_GPS"   // Flight name in APRS track mode GPS message (sent every TRACK_GPS_PERIOD)
 
 #define GPS_24bit_SF 93200     // approx (2^24)/180, used to scale decimal degrees to 24 bit integer
 
@@ -136,8 +139,8 @@ void setup()
        0, 0             // No VOX ton
        );
   
-  broadcastLocation("PRE__FLT");   // Send "PRE__FLT" APRS message to the TH-D74 Tracker radio
-}                                  // Note: for post processing reasons, make all APRS ASCII text message fields a fixed 8 characters long
+  broadcastLocation(HEL_MSG);   // Send hello APRS message to the TH-D74 Tracker radio
+}
 
 //************************************************************************************************
 //************************************************************************************************
@@ -150,11 +153,11 @@ void loop()
    {
       if (Preflight_APRS_packets < MAX_PREFLIGHT_PACKETS)     // Preflight mode will run for (MAX_PREFLIGHT_PACKETS)*(PREFLIGHT_APRS_TX_PERIOD) (in seconds)
         {        
-         alarm.setRtcTimer(0, PREFLIGHT_APRS_TX_PERIOD,0);    // hour, min, sec
-         Snooze.hibernate( config_teensy36 );
          getGPS(120,GPS_PWR_OFF);            // try for 2 minutes to get a GPS Position, turn GPS PWR off when done
          broadcastLocation(PRE_MSG);         // Send the location by APRS
          Preflight_APRS_packets++;        
+         alarm.setRtcTimer(0, PREFLIGHT_APRS_TX_PERIOD,0);    // hour, min, sec
+         Snooze.hibernate( config_teensy36 );
         }
       else
         {
