@@ -1,6 +1,33 @@
-
 // Automatic Packet Rreporting System (APRS) 
-// Compile at 24Mhz to minimize power consumption
+// *** Compile at 24Mhz to minimize power consumption
+
+//*************************************************************************
+//             Configuration
+// Tracker model. One or the other must be defined.
+#define TRACKER_REVA
+//#define TRACKER_REVB
+
+#define FLIGHT_NUM "1038"             // MUST be 4 numeric characters, .e.g. "1030"
+#define PING_ID    38                 // Ping ID (0-255) sent for ping ID byte (should be last two digits of the flight number)
+
+// HIBERNATE parameters --- Launch Date: 29 March 2023, Julian Day 88, Wake Up Date: 16 Nov 2019, Julian Day 320 -----------
+#define HIBERNATE_PERIOD        232   // Will Hibernate for 320-88 = 232 days
+
+// PREFLIGHT mode parameters
+#define PREFLIGHT_APRS_TX_PERIOD 10   // (Default 10) How often to send an APRS position (minutes)
+#define MAX_PREFLIGHT_PACKETS    12   // (Default 12) PREFLIGHT mode runs for 
+                                      // (PREFLIGHT_APRS_TX_PERIOD)*(MAX_PREFLIGHT_PACKETS) (minutes)
+                                      // (PREFLIGHT_APRS_TX_PERIOD=10)*(MAX_PREFLIGHT_PACKETS=12)= 10*12 = 120 minutes Preflight mode time
+// FLIGHT mode parameters
+#define FLIGHT_TIME 120               // (Default 120) How many minutes to remain in Flight Mode
+
+// TRACK mode parameters
+#define TRACK_GPS_PERIOD         24   // (Default 24) How often to look for a GPS position (hours)
+#define TRACK_APRS_TX_PERIOD     10   // (Default 10) How often to send APRS position message (minutes)
+#define TRACK_PING_TX_PERIOD     15   // (Default 15) How often to send a Ping (seconds)
+//*************************************************************************
+
+// Note: for post processing reasons, make all APRS ASCII text message fields a fixed 8 characters long
 
 #include <afsk.h>
 #include <ax25.h>
@@ -10,21 +37,16 @@
 #include <TinyGPS++.h>            // GPS parsing library
 #include <WProgram.h>
 
-void ax25_send_flag();
+void ax25_send_flag();            // Forward definition, because it is not defined in ax25.h
 
 // Load drivers for the snooze code and configure snooze block.  We only us the RTC alamr so that is all we need to load. 
 SnoozeAlarm  alarm;
 SnoozeBlock config_teensy36(alarm); 
 
-#define GPSSERIAL Serial1       // UBlox GPS is on Serial1
 TinyGPSPlus gps;
 
-// Change the flight number "nnnn_" and PIN_ID to the current flight number, example "1030" and 30
-// Note: for post processing reasons, make all APRS ASCII text message fields a fixed 8 characters long
-#define FLIGHT_NUM "1038"         // MUST be 4 characters
-#define PING_ID    38             // Value (0-255)sent for ping Identification byte (last two digits of the flight number)
-
-#define HEL_MSG    FLIGHT_NUM"_HEL"   // Power on message says hello
+// Message headers for the APRS messages.
+#define HEL_MSG    FLIGHT_NUM"_HEL"   // Power on APRS message says hello
 #define PRE_MSG    FLIGHT_NUM"_PRE"   // Flight name in APRS preflight mode message
 #define TRK_MSG    FLIGHT_NUM"_TRK"   // Flight name in APRS track mode message (sent every TRACK_APRS_TX_PERIOD)
 #define TRK_GPS    FLIGHT_NUM"_GPS"   // Flight name in APRS track mode GPS message (sent every TRACK_GPS_PERIOD)
@@ -40,25 +62,23 @@ TinyGPSPlus gps;
 #define HIBERNATE 2       // Hibernate mode, do nothing until wake up day
 #define TRACK     3       // Track mode, Accquire GPS location, send APRS, send GPS and tone pings
 
-// PREFLIGHT mode parameters
-#define PREFLIGHT_APRS_TX_PERIOD 10   // How often to send an APRS position (minutes)
-#define MAX_PREFLIGHT_PACKETS 12      // PREFLIGHT mode runs for (PREFLIGHT_APRS_TX_PERIOD)*(MAX_PREFLIGHT_PACKETS) (minutes)
-                                      // (PREFLIGHT_APRS_TX_PERIOD=10)*(MAX_PREFLIGHT_PACKETS=12)= 10*12 = 120 minutes Preflight mode time
-// FLIGHT mode parameters
-#define FLIGHT_TIME 120               // How many minutes to remain in Flight Mode
 
-// HIBERNATE parameters --- Launch Date: 29 March 2023, Julian Day 88, Wake Up Date: 16 Nov 2019, Julian Day 320 -----------
-#define HIBERNATE_PERIOD 232     // Will Hibernate for 320-88 = 232 days
-
-// TRACK mode parameters
-#define TRACK_GPS_PERIOD 24        // How often to look for a GPS position (hours)
-#define TRACK_APRS_TX_PERIOD 10    // How often to send APRS position message (minutes)
-#define TRACK_PING_TX_PERIOD 15    // How often to send a Ping (seconds)
-
+// Pin usage revision dependencies
+#ifdef TRACKER_REVA
+#define GPSSERIAL Serial1       // UBlox GPS is on Serial1
 /* Pin Configuration */
 #define V_TX_SHUTDOWN 23        // Enable pin for 3.6 to 5V boost converter
 #define V_GPS_SHUTDOWN 30       // Power switch on 3.3v line to GPS and Pressure Sensor
 #define TX_ENABLE 2             // Pull this high to turn on the transmitter (Push To Talk function)
+#endif
+
+#ifdef TRACKER_REVB
+#define GPSSERIAL Serial5       // UBlox GPS is on Serial1
+/* Pin Configuration */
+#define V_TX_SHUTDOWN 15        // Enable pin for 3.6 to 5V boost converter
+#define V_GPS_SHUTDOWN 36       // Power switch on 3.3v line to GPS and Pressure Sensor
+#define TX_ENABLE 16             // Pull this high to turn on the transmitter (Push To Talk function)
+#endif
 
 /* APRS Configuration */
 // Set your callsign and SSID here. Common values for the SSID are
