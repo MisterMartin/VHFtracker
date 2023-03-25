@@ -24,7 +24,11 @@ Different I/O pins were used for some functions.
 
 - The previous IDE was a pre-packaged by PRJC, as a modified version of Arduino IDE v1.x, 
   and ran as Teensyduino.
-- PJRC released a board support package which now works with Arduino IDE v2.X. Install yhe
+- PJRC released a board support package which now works with Arduino IDE v2.X. Install the
   Arduino IDE first, and then add Teensy support, found on 
   the [PRJC download page](https://www.pjrc.com/teensy/td_download.html).
+- For some reason, the board manager wouldn't read the PRJC board URL. I experimented with
+  manually editing ~/.arduinoIDE/arduino-cli.yaml to add the URL, and restarting the 
+  IDE multiple times. It finally ready the URL and provided the Teensy in the boards list.
+  Perhaps the issue was due to the slow Internet access from McMurdo.
 
