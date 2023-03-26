@@ -49,7 +49,7 @@ TinyGPSPlus gps;
 #define HEL_MSG    FLIGHT_NUM"_HEL"   // Power on APRS message says hello
 #define PRE_MSG    FLIGHT_NUM"_PRE"   // Flight name in APRS preflight mode message
 #define FLT_MSG    FLIGHT_NUM"_FLT"   // Flight name in APRS flight mode message
-#define FLT_MSG    FLIGHT_NUM"_HIB"   // Flight name in APRS hibernate mode message
+#define HIB_MSG    FLIGHT_NUM"_HIB"   // Flight name in APRS hibernate mode message
 #define TRK_MSG    FLIGHT_NUM"_TRK"   // Flight name in APRS track mode message (sent every TRACK_APRS_TX_PERIOD)
 #define TRK_GPS    FLIGHT_NUM"_GPS"   // Flight name in APRS track mode GPS message (sent every TRACK_GPS_PERIOD)
 
@@ -124,12 +124,23 @@ byte APRS_XMIT_count = 0;          // increments when ever a APRS message is sen
 
 int mode = PREFLIGHT;              // mode must be initialized to PREFLIGHT for all balloon flights
 
+#ifdef TRACKER_REVA
+char* board_revision = "Configured for board REV A";
+#endif
+#ifdef TRACKER_REVB
+char* board_revision = "Configured for board REV B";
+#endif
+#if (!defined(TRACKER_REVA) && !defined(TRACKER_REVB)) || (defined(TRACKER_REVA) && (defined(TRACKER_REVB)))
+#error "One of TRACKER_REVA or TRACKER_REVB must be defined."
+#endif
+
 //************************************************************************************************
 //************************************************************************************************
 void setup()
 {
   Serial.begin(9600); // For debugging output over the USB port
   Serial.println(__FILE__);
+  Serial.println(board_revision);
 
   /* GPS Setup */
    GPSSERIAL.begin(9600); //GPS receiver setup
@@ -250,7 +261,7 @@ void loop()
        {
           if(track_APRS_packets * TRACK_APRS_TX_PERIOD >= TRACK_GPS_PERIOD * 60)     // If it is time, update the GPS position 
             {
-              getGPS(10,GPS_PWR_OFF);      // try for 3 minutes to get a GPS Position
+              getGPS(10,GPS_PWR_OFF);       // try for 10 seconds to get a GPS Position
               broadcastLocation(TRK_GPS);   // Send the new GPS location by APRS and indicate a GPS cycle
               track_APRS_packets = 1;       // Reset track_APRS_packets counter after the GPS position has been updated
             }
