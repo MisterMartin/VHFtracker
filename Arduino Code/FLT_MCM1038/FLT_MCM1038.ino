@@ -48,6 +48,8 @@ TinyGPSPlus gps;
 // Message headers for the APRS messages.
 #define HEL_MSG    FLIGHT_NUM"_HEL"   // Power on APRS message says hello
 #define PRE_MSG    FLIGHT_NUM"_PRE"   // Flight name in APRS preflight mode message
+#define FLT_MSG    FLIGHT_NUM"_FLT"   // Flight name in APRS flight mode message
+#define HIB_MSG    FLIGHT_NUM"_HIB"   // Flight name in APRS hibernate mode message
 #define TRK_MSG    FLIGHT_NUM"_TRK"   // Flight name in APRS track mode message (sent every TRACK_APRS_TX_PERIOD)
 #define TRK_GPS    FLIGHT_NUM"_GPS"   // Flight name in APRS track mode GPS message (sent every TRACK_GPS_PERIOD)
 
@@ -127,6 +129,8 @@ int mode = PREFLIGHT;              // mode must be initialized to PREFLIGHT for 
 void setup()
 {
   Serial.begin(9600); // For debugging output over the USB port
+  Serial.println(__FILE__);
+
   /* GPS Setup */
    GPSSERIAL.begin(9600); //GPS receiver setup
 
@@ -181,7 +185,7 @@ void loop()
         }
       else
         {
-         broadcastLocation("FLT_MODE");   // Send "FLT_MODE" APRS message to the TH-D74 Tracker radio
+         broadcastLocation(FLT_MSG);      // Send "FLT_MODE" APRS message to the TH-D74 Tracker radio
          Ping_Array[1] = 0;               // Reset the counter that tracks the number of invalid GPS fixes
          APRS_XMIT_count = 0;             // Reset APRS message sent counter when changing modes
          mode = FLIGHT;                   // Go to FLIGHT mode when Preflight mode is completed
@@ -202,7 +206,7 @@ void loop()
          }                                                   
       
         digitalWrite(V_GPS_SHUTDOWN, LOW);      // Always turn off GPS Power when leaving FLIGHT mode
-        broadcastLocation("HIB_MODE");          // Send "HIB_MODE" APRS message to the TH-D74 Tracker radio
+        broadcastLocation(HIB_MSG);             // Send "HIB_MODE" APRS message to the TH-D74 Tracker radio
         Ping_Array[1] = 0;                      // Reset the counter that tracks the number of invalid GPS fixes
         APRS_XMIT_count = 0;                    // Reset APRS message sent counter when changing modes
         mode = HIBERNATE;                       // Go to HIBERNATE mode when flight mode is completed
@@ -225,7 +229,7 @@ void loop()
        else
         {
          getGPS(300,GPS_PWR_OFF);         // try for 5 minutes to get a GPS Position                                                             
-         broadcastLocation("TRK_MODE");   // Send "TRK_MODE" APRS message to the TH-D74 Tracker radio
+         broadcastLocation(TRK_MSG);      // Send "TRK_MODE" APRS message to the TH-D74 Tracker radio
          APRS_XMIT_count = 0;             // Reset APRS message sent counter when changing modes
          mode = TRACK;                    // Go to TRACK mode when hibernate period completed    
         }  
