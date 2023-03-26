@@ -7,23 +7,23 @@
 #define TRACKER_REVA
 //#define TRACKER_REVB
 
-#define FLIGHT_NUM "1038"             // MUST be 4 numeric characters, .e.g. "1030"
-#define PING_ID    38                 // Ping ID (0-255) sent for ping ID byte (should be last two digits of the flight number)
+#define FLIGHT_NUM "1234"             // MUST be 4 numeric characters, .e.g. "1030"
+#define PING_ID     34                // Ping ID (0-255) sent for ping ID byte (should be last two digits of the flight number)
 
 // HIBERNATE parameters --- Launch Date: 29 March 2023, Julian Day 88, Wake Up Date: 16 Nov 2019, Julian Day 320 -----------
 #define HIBERNATE_PERIOD        232   // Will Hibernate for 320-88 = 232 days
 
 // PREFLIGHT mode parameters
-#define PREFLIGHT_APRS_TX_PERIOD 10   // (Default 10) How often to send an APRS position (minutes)
-#define MAX_PREFLIGHT_PACKETS    12   // (Default 12) PREFLIGHT mode runs for 
+#define PREFLIGHT_APRS_TX_PERIOD 1    // (Default 10) How often to send an APRS position (minutes)
+#define MAX_PREFLIGHT_PACKETS    2    // (Default 12) PREFLIGHT mode runs for 
                                       // (PREFLIGHT_APRS_TX_PERIOD)*(MAX_PREFLIGHT_PACKETS) (minutes)
                                       // (PREFLIGHT_APRS_TX_PERIOD=10)*(MAX_PREFLIGHT_PACKETS=12)= 10*12 = 120 minutes Preflight mode time
 // FLIGHT mode parameters
-#define FLIGHT_TIME 120               // (Default 120) How many minutes to remain in Flight Mode
+#define FLIGHT_TIME 1                 // (Default 120) How many minutes to remain in Flight Mode
 
 // TRACK mode parameters
 #define TRACK_GPS_PERIOD         24   // (Default 24) How often to look for a GPS position (hours)
-#define TRACK_APRS_TX_PERIOD     10   // (Default 10) How often to send APRS position message (minutes)
+#define TRACK_APRS_TX_PERIOD     1    // (Default 10) How often to send APRS position message (minutes)
 #define TRACK_PING_TX_PERIOD     15   // (Default 15) How often to send a Ping (seconds)
 //*************************************************************************
 
@@ -48,8 +48,6 @@ TinyGPSPlus gps;
 // Message headers for the APRS messages.
 #define HEL_MSG    FLIGHT_NUM"_HEL"   // Power on APRS message says hello
 #define PRE_MSG    FLIGHT_NUM"_PRE"   // Flight name in APRS preflight mode message
-#define FLT_MSG    FLIGHT_NUM"_FLT"   // Flight name in APRS flight mode message
-#define HIB_MSG    FLIGHT_NUM"_HIB"   // Flight name in APRS hibernate mode message
 #define TRK_MSG    FLIGHT_NUM"_TRK"   // Flight name in APRS track mode message (sent every TRACK_APRS_TX_PERIOD)
 #define TRK_GPS    FLIGHT_NUM"_GPS"   // Flight name in APRS track mode GPS message (sent every TRACK_GPS_PERIOD)
 
@@ -124,23 +122,12 @@ byte APRS_XMIT_count = 0;          // increments when ever a APRS message is sen
 
 int mode = PREFLIGHT;              // mode must be initialized to PREFLIGHT for all balloon flights
 
-#ifdef TRACKER_REVA
-char* board_revision = "Configured for board REV A";
-#endif
-#ifdef TRACKER_REVB
-char* board_revision = "Configured for board REV B";
-#endif
-#if (!defined(TRACKER_REVA) && !defined(TRACKER_REVB)) || (defined(TRACKER_REVA) && (defined(TRACKER_REVB)))
-#error "One of TRACKER_REVA or TRACKER_REVB must be defined."
-#endif
-
 //************************************************************************************************
 //************************************************************************************************
 void setup()
 {
   Serial.begin(9600); // For debugging output over the USB port
-  Serial.println(__FILE__);
-  Serial.println(board_revision);
+  Serial.println("Setup");
 
   /* GPS Setup */
    GPSSERIAL.begin(9600); //GPS receiver setup
@@ -196,10 +183,11 @@ void loop()
         }
       else
         {
-         broadcastLocation(FLT_MSG);      // Send "FLT_MODE" APRS message to the TH-D74 Tracker radio
+         broadcastLocation("FLT_MODE");   // Send "FLT_MODE" APRS message to the TH-D74 Tracker radio
          Ping_Array[1] = 0;               // Reset the counter that tracks the number of invalid GPS fixes
          APRS_XMIT_count = 0;             // Reset APRS message sent counter when changing modes
          mode = FLIGHT;                   // Go to FLIGHT mode when Preflight mode is completed
+         Serial.println("setup()");
         }   
    }   
 
@@ -217,7 +205,7 @@ void loop()
          }                                                   
       
         digitalWrite(V_GPS_SHUTDOWN, LOW);      // Always turn off GPS Power when leaving FLIGHT mode
-        broadcastLocation(HIB_MSG);             // Send "HIB_MODE" APRS message to the TH-D74 Tracker radio
+        broadcastLocation("HIB_MODE");          // Send "HIB_MODE" APRS message to the TH-D74 Tracker radio
         Ping_Array[1] = 0;                      // Reset the counter that tracks the number of invalid GPS fixes
         APRS_XMIT_count = 0;                    // Reset APRS message sent counter when changing modes
         mode = HIBERNATE;                       // Go to HIBERNATE mode when flight mode is completed
@@ -240,7 +228,7 @@ void loop()
        else
         {
          getGPS(300,GPS_PWR_OFF);         // try for 5 minutes to get a GPS Position                                                             
-         broadcastLocation(TRK_MSG);      // Send "TRK_MODE" APRS message to the TH-D74 Tracker radio
+         broadcastLocation("TRK_MODE");   // Send "TRK_MODE" APRS message to the TH-D74 Tracker radio
          APRS_XMIT_count = 0;             // Reset APRS message sent counter when changing modes
          mode = TRACK;                    // Go to TRACK mode when hibernate period completed    
         }  
