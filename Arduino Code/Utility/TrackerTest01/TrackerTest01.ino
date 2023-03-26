@@ -11,7 +11,7 @@
 #define PING_ID     34                // Ping ID (0-255) sent for ping ID byte (should be last two digits of the flight number)
 
 // HIBERNATE parameters 
-#define HIBERNATE_PERIOD        0     // Will Hibernate for 320-88 = 232 days
+#define HIBERNATE_PERIOD         2     // Will Hibernate for 2 * 10s
 
 // PREFLIGHT mode parameters
 #define PREFLIGHT_APRS_TX_PERIOD 1    // (Default 10) How often to send an APRS position (minutes)
@@ -140,6 +140,9 @@ void setup()
 {
   Serial.begin(9600); // For debugging output over the USB port
   Serial.println(__FILE__);
+  Serial.print("Build time: ");
+  Serial.print(__TIMESTAMP__);
+  Serial.print(" ");
   Serial.println(board_revision);
 
   /* GPS Setup */
@@ -175,7 +178,6 @@ void setup()
        );
   
   broadcastLocation(HEL_MSG);   // Send hello APRS message to the TH-D74 Tracker radio
-  Serial.println("Preflight mode");
 }
 
 //************************************************************************************************
@@ -201,7 +203,6 @@ void loop()
          Ping_Array[1] = 0;               // Reset the counter that tracks the number of invalid GPS fixes
          APRS_XMIT_count = 0;             // Reset APRS message sent counter when changing modes
          mode = FLIGHT;                   // Go to FLIGHT mode when Preflight mode is completed
-         Serial.println("Flight Mode");
         }   
    }   
 
@@ -223,7 +224,6 @@ void loop()
         Ping_Array[1] = 0;                      // Reset the counter that tracks the number of invalid GPS fixes
         APRS_XMIT_count = 0;                    // Reset APRS message sent counter when changing modes
         mode = HIBERNATE;                       // Go to HIBERNATE mode when flight mode is completed
-        Serial.println("Hibernate Mode");
       } 
 
   //---------------------------------------------------------------------------------------------
@@ -236,7 +236,7 @@ void loop()
    {
       if (Hibernate_day < HIBERNATE_PERIOD)      // stay in Hibernate until hibernate period is complete
         {
-         alarm.setRtcTimer(24, 0, 0);            // Set Timer to 24 hours, 0 minutes, 0 seconds to go to sleep for a day
+         alarm.setRtcTimer(0, 0, 10);            // Set Timer to 0 hours, 0 minutes, 10 seconds to go to sleep for a day
          Snooze.hibernate( config_teensy36 );
          Hibernate_day ++;                       // number of days in hibernate   
         }
@@ -246,7 +246,6 @@ void loop()
          broadcastLocation(TRK_MSG);      // Send "TRK_MODE" APRS message to the TH-D74 Tracker radio
          APRS_XMIT_count = 0;             // Reset APRS message sent counter when changing modes
          mode = TRACK;                    // Go to TRACK mode when hibernate period completed    
-         Serial.println("Track Mode");
         }  
    }
 
