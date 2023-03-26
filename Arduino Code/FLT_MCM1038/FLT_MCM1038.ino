@@ -140,6 +140,9 @@ void setup()
 {
   Serial.begin(9600); // For debugging output over the USB port
   Serial.println(__FILE__);
+  Serial.print("Build time: ");
+  Serial.print(__TIMESTAMP__);
+  Serial.print(" ");
   Serial.println(board_revision);
 
   /* GPS Setup */
