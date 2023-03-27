@@ -1,6 +1,7 @@
 from PyQt5.QtSerialPort import QSerialPort
 from PyQt5.QtCore import QObject, QTimer, QIODevice, QThread, QFile, pyqtSignal
 from datetime import datetime
+import sys
 
 class TrackerAX25(QThread):
 
@@ -19,13 +20,23 @@ class TrackerAX25(QThread):
         self.aprsLastTime = None
 
     def run(self)->None:
-        self.file = QFile(self.device)
-        self.file.open(QIODevice.ReadOnly | QIODevice.Unbuffered)
+        print(f'Opening {self.device}...')
+        if (sys.platform == 'win32'):
+            self.file = QSerialPort(self.device)
+            self.file.setReadBufferSize(1)
+            status = self.file.open(QIODevice.ReadOnly)
+        else:
+            self.file = QFile(self.device)
+            status = self.file.open(QIODevice.ReadOnly | QIODevice.Unbuffered)
+        print(f'...open status = {status}')
+        if not status:
+            sys.exit()
         msg = bytearray()
         while(1):
-            c = self.file.read(1)
+            c = self.file.readData(1)
             if c:
                 msg += c
+                #print(msg)
                 if (len(msg) > 1 and msg[-1] == 0xc0):
                     if (len(msg) == 11):
                         elapsedSecs, self.pingLastTime = self.elapsedSecs(self.pingLastTime)
@@ -56,6 +67,10 @@ class TrackerAX25(QThread):
                         self.aprsSignal.emit(msgDict)
                         #print(msg)
                     msg.clear()
+
+    def readReady()->None:
+        print('readReady')
+        print(self.file.readAll())
 
     def elapsedSecs(self, timeOfLast: datetime)->int:
         currentTime = datetime.now()

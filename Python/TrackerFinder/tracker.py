@@ -16,7 +16,12 @@ if __name__ == "__main__":
 
     def parseArgs() -> dict:
         parser = ArgumentParser()
-        parser.add_argument("-d", "--device", help="APRS device",
+
+        if sys.platform == 'win32':
+            parser.add_argument("-d", "--device", help="APRS device",
+                    action="store", default='COM4')
+        else:
+            parser.add_argument("-d", "--device", help="APRS device",
                     action="store", default='/dev/tty.TH-D74')
 
         return parser.parse_args()
