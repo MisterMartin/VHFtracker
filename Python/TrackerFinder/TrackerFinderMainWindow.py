@@ -1,8 +1,13 @@
+import sys
 from PyQt5.QtWidgets import QApplication, QMainWindow, QMessageBox, QDesktopWidget
 from PyQt5.QtCore import QTimer, QIODevice, pyqtSignal
 from Ui_TrackerFinderMainWindow import Ui_TrackerFinderMainWindow
 
 class TrackerFinderMainWindow(QMainWindow, Ui_TrackerFinderMainWindow):
+
+    # Emitted when the window is closing
+    closeSignal = pyqtSignal()
+
     def __init__(self)->None:
         super().__init__()
         self.setupUi(self)
@@ -26,5 +31,5 @@ class TrackerFinderMainWindow(QMainWindow, Ui_TrackerFinderMainWindow):
         self.pingCount.setText(f"{msg['pingCount']: d}")
         self.pingDeltaT.setText(f"{msg['deltaTsecs']: d}")
 
-
-
+    def closeEvent(self, a0):
+        self.closeSignal.emit()
