@@ -7,8 +7,8 @@
 #define TRACKER_REVA
 //#define TRACKER_REVB
 
-#define FLIGHT_NUM "1234"             // MUST be 4 numeric characters, .e.g. "1030"
-#define PING_ID     34                // Ping ID (0-255) sent for ping ID byte (should be last two digits of the flight number)
+#define FLIGHT_NUM "TST1"             // MUST be 4 numeric characters, .e.g. "1030"
+#define PING_ID     99                // Ping ID (0-255) sent for ping ID byte (should be last two digits of the flight number)
 
 // HIBERNATE parameters 
 #define HIBERNATE_PERIOD         2     // Will Hibernate for 2 * 10s
@@ -23,7 +23,7 @@
 
 // TRACK mode parameters
 #define TRACK_GPS_PERIOD         24   // (Default 24) How often to look for a GPS position (hours)
-#define TRACK_APRS_TX_PERIOD     1    // (Default 10) How often to send APRS position message (minutes)
+#define TRACK_APRS_TX_PERIOD     2    // (Default 10) How often to send APRS position message (minutes)
 #define TRACK_PING_TX_PERIOD     15   // (Default 15) How often to send a Ping (seconds)
 //*************************************************************************
 
@@ -242,7 +242,7 @@ void loop()
         }
        else
         {
-         getGPS(300,GPS_PWR_OFF);         // try for 5 minutes to get a GPS Position                                                             
+         getGPS(10,GPS_PWR_OFF);          // try for 5 minutes to get a GPS Position                                                             
          broadcastLocation(TRK_MSG);      // Send "TRK_MODE" APRS message to the TH-D74 Tracker radio
          APRS_XMIT_count = 0;             // Reset APRS message sent counter when changing modes
          mode = TRACK;                    // Go to TRACK mode when hibernate period completed    
