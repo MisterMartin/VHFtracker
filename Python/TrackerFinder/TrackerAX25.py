@@ -20,7 +20,6 @@ class TrackerAX25(QThread):
         self.aprsLastTime = None
 
     def run(self)->None:
-        print(f'Opening {self.device}...')
         if (sys.platform == 'win32'):
             self.file = QSerialPort(self.device)
             self.file.setReadBufferSize(1)
@@ -28,7 +27,6 @@ class TrackerAX25(QThread):
         else:
             self.file = QFile(self.device)
             status = self.file.open(QIODevice.ReadOnly | QIODevice.Unbuffered)
-        print(f'...open status = {status}')
         if not status:
             sys.exit()
         msg = bytearray()

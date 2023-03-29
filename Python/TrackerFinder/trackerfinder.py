@@ -46,6 +46,7 @@ if __name__ == "__main__":
     # Create the main window
     mainWindow = TrackerFinderMainWindow()
     mainWindow.closeSignal.connect(closeApp)
+    mainWindow.setStatus(f'Device: {args.device}')
     mainWindow.show()
 
     # Create and start the ax25 reader thread.
