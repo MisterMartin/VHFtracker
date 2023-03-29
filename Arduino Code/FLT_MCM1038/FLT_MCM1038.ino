@@ -10,9 +10,6 @@
 #define FLIGHT_NUM "1038"             // MUST be 4 numeric characters, .e.g. "1030"
 #define PING_ID    38                 // Ping ID (0-255) sent for ping ID byte (should be last two digits of the flight number)
 
-// HIBERNATE parameters --- Launch Date: 29 March 2023, Julian Day 88, Wake Up Date: 16 Nov 2019, Julian Day 320 -----------
-#define HIBERNATE_PERIOD        232   // Will Hibernate for 320-88 = 232 days
-
 // PREFLIGHT mode parameters
 #define PREFLIGHT_APRS_TX_PERIOD 10   // (Default 10) How often to send an APRS position (minutes)
 #define MAX_PREFLIGHT_PACKETS    12   // (Default 12) PREFLIGHT mode runs for 
@@ -20,6 +17,9 @@
                                       // (PREFLIGHT_APRS_TX_PERIOD=10)*(MAX_PREFLIGHT_PACKETS=12)= 10*12 = 120 minutes Preflight mode time
 // FLIGHT mode parameters
 #define FLIGHT_TIME 120               // (Default 120) How many minutes to remain in Flight Mode
+
+// HIBERNATE parameters --- Launch Date: 02 April 2023 (JD 92), Wake Up Date: 01 Nov 2023(JD 305) -----------
+#define HIBERNATE_PERIOD        213   // Will Hibernate for 320-88 = 213 days
 
 // TRACK mode parameters
 #define TRACK_GPS_PERIOD         24   // (Default 24) How often to look for a GPS position (hours)
@@ -191,11 +191,11 @@ void loop()
    {
       if (Preflight_APRS_packets < MAX_PREFLIGHT_PACKETS)     // Preflight mode will run for (MAX_PREFLIGHT_PACKETS)*(PREFLIGHT_APRS_TX_PERIOD) (in seconds)
         {        
+         alarm.setRtcTimer(0, PREFLIGHT_APRS_TX_PERIOD,0);    // hour, min, sec
+         Snooze.hibernate( config_teensy36 );
          getGPS(120,GPS_PWR_OFF);            // try for 2 minutes to get a GPS Position, turn GPS PWR off when done
          broadcastLocation(PRE_MSG);         // Send the location by APRS
          Preflight_APRS_packets++;        
-         alarm.setRtcTimer(0, PREFLIGHT_APRS_TX_PERIOD,0);    // hour, min, sec
-         Snooze.hibernate( config_teensy36 );
         }
       else
         {
