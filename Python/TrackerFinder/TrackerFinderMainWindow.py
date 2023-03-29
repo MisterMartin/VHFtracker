@@ -31,5 +31,8 @@ class TrackerFinderMainWindow(QMainWindow, Ui_TrackerFinderMainWindow):
         self.pingCount.setText(f"{msg['pingCount']: d}")
         self.pingDeltaT.setText(f"{msg['deltaTsecs']: d}")
 
+    def setStatus(self, text:str)->None:
+        self.statusBar().showMessage(text)
+
     def closeEvent(self, a0):
         self.closeSignal.emit()

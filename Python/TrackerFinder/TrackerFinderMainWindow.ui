@@ -159,14 +159,14 @@
     <item>
      <widget class="QLabel" name="label_17">
       <property name="text">
-       <string> </string>
+       <string/>
       </property>
      </widget>
     </item>
     <item>
      <widget class="QLabel" name="label_18">
       <property name="text">
-       <string> </string>
+       <string/>
       </property>
      </widget>
     </item>
@@ -324,7 +324,7 @@
      <x>0</x>
      <y>0</y>
      <width>414</width>
-     <height>22</height>
+     <height>21</height>
     </rect>
    </property>
   </widget>
