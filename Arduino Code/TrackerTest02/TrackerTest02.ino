@@ -194,22 +194,21 @@ void loop()
   // Loop through different modes. A long hibernation 
   // occurs at the end of the sequence
 
-    blink(2);
+    blink(1);
 
-    hibernate(10);
+    hibernate(20);
+    Output_Ping_tone(40, 255);   // Send tone
+
+    hibernate(20);
     getGPS(10,GPS_PWR_OFF);     // Read GPS
 
-    hibernate(10);
+    hibernate(20);
     broadcastLocation(HEL_MSG); // Send APRS
 
-    hibernate(10);             // 3 flashes
-    Output_Ping_tone(11,53);    // Send tone
+    hibernate(20);
+    EncodedPing();               // Send ping position
 
-    hibernate(10);             // 4 flashes
-    EncodedPing();              // Send ping position
-
-    alarm.setRtcTimer(0, 0, 20);// 20 second hibernate 
-    Snooze.hibernate( config_teensy36 );
+    hibernate(20);
 }
 
 //************************************************************************************************
