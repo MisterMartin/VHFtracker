@@ -7,8 +7,8 @@
 #define TRACKER_REVA
 //#define TRACKER_REVB
 
-#define FLIGHT_NUM "1038"             // MUST be 4 numeric characters, .e.g. "1030"
-#define PING_ID    38                 // Ping ID (0-255) sent for ping ID byte (should be last two digits of the flight number)
+#define FLIGHT_NUM "1039"             // MUST be 4 numeric characters, .e.g. "1030"
+#define PING_ID    39                 // Ping ID (0-255) sent for ping ID byte (should be last two digits of the flight number)
 
 // PREFLIGHT mode parameters
 #define PREFLIGHT_APRS_TX_PERIOD 10   // (Default 10) How often to send an APRS position (minutes)
