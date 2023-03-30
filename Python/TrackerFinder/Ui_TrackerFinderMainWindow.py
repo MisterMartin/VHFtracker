@@ -151,7 +151,7 @@ class Ui_TrackerFinderMainWindow(object):
         self.horizontalLayout.addLayout(self.verticalLayout_4)
         self.verticalLayout_5.addLayout(self.horizontalLayout)
         self.log = QtWidgets.QTextEdit(self.centralwidget)
-        self.log.setMinimumSize(QtCore.QSize(600, 0))
+        self.log.setMinimumSize(QtCore.QSize(500, 0))
         self.log.setObjectName("log")
         self.verticalLayout_5.addWidget(self.log)
         TrackerFinderMainWindow.setCentralWidget(self.centralwidget)
