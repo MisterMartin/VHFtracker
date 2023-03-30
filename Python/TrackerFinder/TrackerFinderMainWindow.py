@@ -1,4 +1,5 @@
 import sys
+from datetime import datetime
 from PyQt5.QtWidgets import QApplication, QMainWindow, QMessageBox, QDesktopWidget
 from PyQt5.QtCore import QTimer, QIODevice, pyqtSignal
 from Ui_TrackerFinderMainWindow import Ui_TrackerFinderMainWindow
@@ -36,3 +37,8 @@ class TrackerFinderMainWindow(QMainWindow, Ui_TrackerFinderMainWindow):
 
     def closeEvent(self, a0):
         self.closeSignal.emit()
+
+    def addToLog(self, text:str)->None:
+        timeStamp = datetime.now()
+        ts = timeStamp.isoformat(sep=' ', timespec='seconds')
+        self.log.append(f'{ts} {text}')

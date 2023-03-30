@@ -53,8 +53,10 @@ if __name__ == "__main__":
     trackerAx25 = TrackerAX25(device=args.device)
     trackerAx25.aprsSignal.connect(mainWindow.aprsMsg)
     trackerAx25.posPingSignal.connect(mainWindow.pingMsg)
+    trackerAx25.logSignal.connect(mainWindow.addToLog)
     trackerAx25.start()
 
+    mainWindow.addToLog('--- TrackerFinder Started ---')
     # Catch SIG_INT
     signal.signal(signal.SIGINT, sigint_handler)
 

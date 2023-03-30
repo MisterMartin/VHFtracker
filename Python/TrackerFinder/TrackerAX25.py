@@ -9,8 +9,8 @@ class TrackerAX25(QThread):
     # dict: { 
     # }
     aprsSignal = pyqtSignal(dict)
-
     posPingSignal = pyqtSignal(dict)
+    logSignal = pyqtSignal(str)
 
     def __init__(self, device:str=None)->None:
         super().__init__()
@@ -49,6 +49,7 @@ class TrackerAX25(QThread):
                             'deltaTsecs': elapsedSecs
                         }
                         self.posPingSignal.emit(posDict)
+                        self.pingLog(posDict)
                     else:
                         # APRS message
                         elapsedSecs, self.aprsLastTime = self.elapsedSecs(self.aprsLastTime)
@@ -63,6 +64,7 @@ class TrackerAX25(QThread):
                             'deltaTsecs': elapsedSecs
                         }
                         self.aprsSignal.emit(msgDict)
+                        self.aprsLog(msgDict)
                         #print(msg)
                     msg.clear()
 
@@ -118,3 +120,24 @@ class TrackerAX25(QThread):
     def tag(self, msg:bytearray)->str:
         return msg[75:83].decode()
 
+    def aprsLog(self, msgDict:dict)->None:
+        logMsg = f'''\
+APRS \
+{msgDict['tag']} \
+{msgDict['lat']} \
+{msgDict['lon']} \
+{msgDict['failed']} \
+{msgDict['count']} \
+{msgDict['alt']}\
+'''
+        self.logSignal.emit(logMsg)
+
+    def pingLog(self, msgDict:dict)->None:
+        logMsg = f'''\
+PING \
+{msgDict['id']} \
+{msgDict['age']} \
+{msgDict['lat']: .4f} \
+{msgDict['lon']: .4f}\
+'''
+        self.logSignal.emit(logMsg)
