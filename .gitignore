@@ -1,5 +1,5 @@
 .DS_Store
 /.vs
 /Python/TrackerFinder/__pycache__
-Python/TrackerFinder/*TrackerFinder.raw
-Python/TrackerFinder/*TrackerFinder.log
+Python/TrackerFinder/*.raw
+Python/TrackerFinder/*.log
