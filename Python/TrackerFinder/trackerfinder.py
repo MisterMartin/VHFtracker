@@ -5,6 +5,8 @@ from PyQt5.QtWidgets import QApplication
 from PyQt5.QtCore import QTimer
 from TrackerAX25 import TrackerAX25
 from TrackerFinderMainWindow import TrackerFinderMainWindow
+from Logger import Logger
+
 #
 # Python modules:
 #  PyQt5
@@ -55,6 +57,13 @@ if __name__ == "__main__":
     trackerAx25.posPingSignal.connect(mainWindow.pingMsg)
     trackerAx25.logSignal.connect(mainWindow.addToLog)
     trackerAx25.start()
+
+    # Create the logger
+    # Will create a .raw and .log file
+    logger = Logger("TrackerFinder")
+    trackerAx25.logSignal.connect(logger.log)
+    trackerAx25.rawSignal.connect(logger.raw)
+    logger.log('--- TrackerFinder Started ---')
 
     mainWindow.addToLog('--- TrackerFinder Started ---')
     # Catch SIG_INT

@@ -4,13 +4,25 @@ from datetime import datetime
 import sys
 
 class TrackerAX25(QThread):
+    '''Read AX.25 messages from the VHFTracker, decode, and deliver as signals.
 
+    This is started as a thread. It will perform a blocking read, waiting for
+    each character of the AX.25 packet to come in. When the 0xc0 message
+    terminator is received, the message is decoded.
+
+    There are two types of messages: an APRS message, and our own
+    compact, custom position ping message.
+    '''
+    
     # Emitted when a message has been received and decoded.
     # dict: { 
     # }
     aprsSignal = pyqtSignal(dict)
     posPingSignal = pyqtSignal(dict)
+    # Emit a string to go in a text log file
     logSignal = pyqtSignal(str)
+    # Emit a byte array of APRS or Ping data
+    rawSignal = pyqtSignal(bytes)
 
     def __init__(self, device:str=None)->None:
         super().__init__()
@@ -34,7 +46,6 @@ class TrackerAX25(QThread):
             c = self.file.readData(1)
             if c:
                 msg += c
-                #print(msg)
                 if (len(msg) > 1 and msg[-1] == 0xc0):
                     if (len(msg) == 11):
                         elapsedSecs, self.pingLastTime = self.elapsedSecs(self.pingLastTime)
@@ -50,6 +61,7 @@ class TrackerAX25(QThread):
                         }
                         self.posPingSignal.emit(posDict)
                         self.pingLog(posDict)
+                        self.rawSignal.emit(bytes(msg))
                     else:
                         # APRS message
                         elapsedSecs, self.aprsLastTime = self.elapsedSecs(self.aprsLastTime)
@@ -65,7 +77,7 @@ class TrackerAX25(QThread):
                         }
                         self.aprsSignal.emit(msgDict)
                         self.aprsLog(msgDict)
-                        #print(msg)
+                        self.rawSignal.emit(bytes(msg))
                     msg.clear()
 
     def readReady()->None:
@@ -121,6 +133,7 @@ class TrackerAX25(QThread):
         return msg[75:83].decode()
 
     def aprsLog(self, msgDict:dict)->None:
+        '''Emit a signal for text logging of a decoded APRS msg'''
         logMsg = f'''\
 APRS \
 {msgDict['tag']} \
@@ -133,6 +146,7 @@ APRS \
         self.logSignal.emit(logMsg)
 
     def pingLog(self, msgDict:dict)->None:
+        '''Emit a signal for text logging of a decoded ping msg'''
         logMsg = f'''\
 PING \
 {msgDict['id']} \
