@@ -18,8 +18,8 @@
 // FLIGHT mode parameters
 #define FLIGHT_TIME 120               // (Default 120) How many minutes to remain in Flight Mode
 
-// HIBERNATE parameters --- Launch Date: 02 April 2023 (JD 92), Wake Up Date: 01 Nov 2023(JD 305) -----------
-#define HIBERNATE_PERIOD        213   // Will Hibernate for 320-88 = 213 days
+// HIBERNATE parameters --- Launch Date: 03 April 2023 (JD 92), Wake Up Date: 01 Nov 2023(JD 305) -----------
+#define HIBERNATE_PERIOD        212   // Will Hibernate for 320-88 = 213 days
 
 // TRACK mode parameters
 #define TRACK_GPS_PERIOD         24   // (Default 24) How often to look for a GPS position (hours)
