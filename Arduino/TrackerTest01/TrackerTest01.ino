@@ -23,7 +23,7 @@
 
 // TRACK mode parameters
 #define TRACK_GPS_PERIOD         24   // (Default 24) How often to look for a GPS position (hours)
-#define TRACK_APRS_TX_PERIOD     2    // (Default 10) How often to send APRS position message (minutes)
+#define TRACK_APRS_TX_PERIOD     3    // (Default 10) How often to send APRS position message (minutes)
 #define TRACK_PING_TX_PERIOD     15   // (Default 15) How often to send a Ping (seconds)
 //*************************************************************************
 
