@@ -7,7 +7,27 @@
 #define TRACKER_REVA
 //#define TRACKER_REVB
 
-#define FLIGHT_NUM "TST1"             // MUST be 4 numeric characters, .e.g. "1030"
+// Use this program to test a tracker with a normal sequence of messages, but sent at a faster rate.
+// It will send the following messages:
+//    HEL
+//    PRE
+//    FLT
+//    Repeating:
+//      TRK,  wait 15s
+//      TONE, wait 15s
+//      TONE, wait 15s
+//      TONE, wait 15s
+//      PING, wait 15s
+//      TONE, wait 15s
+//      TONE, wait 15s
+//      TONE, wait 15s
+//      PING, wait 15s
+//      TONE, wait 15s
+//      TONE, wait 15s
+//      TONE, wait 15s
+
+//                                    // Set FLIGHT_NUM to the unit number, for logging purposes.
+#define FLIGHT_NUM "T402"             // ***MUST*** be 4 numeric characters, .e.g. "T402"
 #define PING_ID     99                // Ping ID (0-255) sent for ping ID byte (should be last two digits of the flight number)
 
 // HIBERNATE parameters 
@@ -142,7 +162,10 @@ void setup()
   Serial.println(__FILE__);
   Serial.print("Build time: ");
   Serial.print(__TIMESTAMP__);
-  Serial.print(" ");
+  Serial.print(", ");
+  Serial.print("Flight ");
+  Serial.print(FLIGHT_NUM);
+  Serial.print(", ");
   Serial.println(board_revision);
 
   /* GPS Setup */
