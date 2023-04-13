@@ -214,7 +214,7 @@ void loop()
    {
       if (Preflight_APRS_packets < MAX_PREFLIGHT_PACKETS)     // Preflight mode will run for (MAX_PREFLIGHT_PACKETS)*(PREFLIGHT_APRS_TX_PERIOD) (in seconds)
         {        
-         getGPS(10,GPS_PWR_OFF);            // try for 2 minutes to get a GPS Position, turn GPS PWR off when done
+         getGPS(120,GPS_PWR_OFF);            // try for 2 minutes to get a GPS Position, turn GPS PWR off when done
          broadcastLocation(PRE_MSG);         // Send the location by APRS
          Preflight_APRS_packets++;        
          alarm.setRtcTimer(0, 0, 10);    // hour, min, sec
