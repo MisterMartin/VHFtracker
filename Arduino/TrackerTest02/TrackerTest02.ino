@@ -4,8 +4,8 @@
 //*************************************************************************
 //             Configuration
 // Tracker model. One or the other must be defined.
-#define TRACKER_REVA
-//#define TRACKER_REVB
+//#define TRACKER_REVA
+#define TRACKER_REVB
 
 #define FLIGHT_NUM "TST2"             // MUST be 4 numeric characters, .e.g. "1030"
 #define PING_ID     99                // Ping ID (0-255) sent for ping ID byte (should be last two digits of the flight number)
