@@ -33,7 +33,6 @@ class TrackerAX25(QThread):
 
     def run(self)->None:
         self.file = Serial(self.device)
-        print(f'Open {self.file} {self.file} ')
         msg = bytearray()
         while(1):
             c = self.file.read(1)
@@ -57,7 +56,6 @@ class TrackerAX25(QThread):
                     msg.clear()
                 else:
                     # APRS message
-                    print('APRS msg')
                     elapsedSecs, self.aprsLastTime = self.elapsedSecs(self.aprsLastTime)
                     msgDict = { 
                         'tag': self.tag(msg), 
