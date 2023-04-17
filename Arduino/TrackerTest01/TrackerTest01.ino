@@ -4,14 +4,21 @@
 //*************************************************************************
 //             Configuration
 // Tracker model. One or the other must be defined.
-#define TRACKER_REVA
-//#define TRACKER_REVB
+//#define TRACKER_REVA
+#define TRACKER_REVB
 
 // Use this program to test a tracker with a normal sequence of messages, but sent at a faster rate.
 // It will send the following messages:
 //    HEL
-//    PRE
+//    wait up to 2 minutes for GPS
+//    PRE 
+//    wait up to 2 minutes for GPS
+//    PRE 
 //    FLT
+//.   get GPS for 1 minute
+//    HIB
+//    hibertnate for 20 seconds
+//    wait up to 10 seconds for GPS
 //    Repeating:
 //      TRK,  wait 15s
 //      TONE, wait 15s
@@ -27,7 +34,7 @@
 //      TONE, wait 15s
 
 //                                    // Set FLIGHT_NUM to the unit number, for logging purposes.
-#define FLIGHT_NUM "T402"             // ***MUST*** be 4 numeric characters, .e.g. "T402"
+#define FLIGHT_NUM "T099"             // ***MUST*** be 4 numeric characters, .e.g. "T402"
 #define PING_ID     99                // Ping ID (0-255) sent for ping ID byte (should be last two digits of the flight number)
 
 // HIBERNATE parameters 
@@ -259,7 +266,7 @@ void loop()
    {
       if (Hibernate_day < HIBERNATE_PERIOD)      // stay in Hibernate until hibernate period is complete
         {
-         alarm.setRtcTimer(0, 0, 10);            // Set Timer to 0 hours, 0 minutes, 10 seconds to go to sleep for a day
+         alarm.setRtcTimer(0, 0, 10);            // Set Timer to 0 hours, 0 minutes, 10 seconds to go to sleep for 10 seconds
          Snooze.hibernate( config_teensy36 );
          Hibernate_day ++;                       // number of days in hibernate   
         }
