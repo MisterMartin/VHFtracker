@@ -34,8 +34,8 @@
 //      TONE, wait 15s
 
 //                                    // Set FLIGHT_NUM to the unit number, for logging purposes.
-#define FLIGHT_NUM "T099"             // ***MUST*** be 4 numeric characters, .e.g. "T402"
-#define PING_ID     99                // Ping ID (0-255) sent for ping ID byte (should be last two digits of the flight number)
+#define FLIGHT_NUM "TST1"             // ***MUST*** be 4 numeric characters, .e.g. "T402"
+#define PING_ID     98                // Ping ID (0-255) sent for ping ID byte (should be last two digits of the flight number)
 
 // HIBERNATE parameters 
 #define HIBERNATE_PERIOD         2     // Will Hibernate for 2 * 10s
