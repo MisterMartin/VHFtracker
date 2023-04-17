@@ -1,7 +1,7 @@
-from PyQt5.QtSerialPort import QSerialPort
+import sys
+from serial import Serial
 from PyQt5.QtCore import QObject, QTimer, QIODevice, QThread, QFile, pyqtSignal
 from datetime import datetime
-import sys
 
 class TrackerAX25(QThread):
     '''Read AX.25 messages from the VHFTracker, decode, and deliver as signals.
@@ -32,54 +32,47 @@ class TrackerAX25(QThread):
         self.aprsLastTime = None
 
     def run(self)->None:
-        if (sys.platform == 'win32'):
-            self.file = QSerialPort(self.device)
-            self.file.setReadBufferSize(1)
-            status = self.file.open(QIODevice.ReadOnly)
-        else:
-            self.file = QFile(self.device)
-            status = self.file.open(QIODevice.ReadOnly | QIODevice.Unbuffered)
-        if not status:
-            sys.exit()
+        self.file = Serial(self.device)
+        print(f'Open {self.file} {self.file} ')
         msg = bytearray()
         while(1):
-            c = self.file.readData(1)
-            if c:
-                msg += c
-                if (len(msg) > 1 and msg[-1] == 0xc0):
-                    if (len(msg) == 11):
-                        elapsedSecs, self.pingLastTime = self.elapsedSecs(self.pingLastTime)
-                        self.pingCount += 1
-                        # TRK position ping
-                        posDict = {
-                            'id': self.id(msg),
-                            'age': self.age(msg),
-                            'lat': self.lat(msg),
-                            'lon': self.lon(msg),
-                            'pingCount': self.pingCount,
-                            'deltaTsecs': elapsedSecs
-                        }
-                        self.posPingSignal.emit(posDict)
-                        self.pingLog(posDict)
-                        self.rawSignal.emit(bytes(msg))
-                    else:
-                        # APRS message
-                        elapsedSecs, self.aprsLastTime = self.elapsedSecs(self.aprsLastTime)
-                        msgDict = { 
-                            'tag': self.tag(msg), 
-                            'time': self.time(msg),
-                            'lat': self.latitude(msg),
-                            'lon': self.longitude(msg),
-                            'failed': self.failed(msg),
-                            'count': self.count(msg),
-                            'alt': self.altitude(msg),
-                            'deltaTsecs': elapsedSecs
-                        }
-                        self.aprsSignal.emit(msgDict)
-                        self.aprsLog(msgDict)
-                        self.rawSignal.emit(bytes(msg))
+            c = self.file.read(1)
+            msg += c
+            if (len(msg) > 1 and msg[-1] == 0xc0):
+                if (len(msg) == 11):
+                    elapsedSecs, self.pingLastTime = self.elapsedSecs(self.pingLastTime)
+                    self.pingCount += 1
+                    # TRK position ping
+                    posDict = {
+                        'id': self.id(msg),
+                        'age': self.age(msg),
+                        'lat': self.lat(msg),
+                        'lon': self.lon(msg),
+                        'pingCount': self.pingCount,
+                        'deltaTsecs': elapsedSecs
+                    }
+                    self.posPingSignal.emit(posDict)
+                    self.pingLog(posDict)
+                    self.rawSignal.emit(bytes(msg))
                     msg.clear()
-
+                else:
+                    # APRS message
+                    print('APRS msg')
+                    elapsedSecs, self.aprsLastTime = self.elapsedSecs(self.aprsLastTime)
+                    msgDict = { 
+                        'tag': self.tag(msg), 
+                        'time': self.time(msg),
+                        'lat': self.latitude(msg),
+                        'lon': self.longitude(msg),
+                        'failed': self.failed(msg),
+                        'count': self.count(msg),
+                        'alt': self.altitude(msg),
+                        'deltaTsecs': elapsedSecs
+                    }
+                    self.aprsSignal.emit(msgDict)
+                    self.aprsLog(msgDict)
+                    self.rawSignal.emit(bytes(msg))
+                    msg.clear()
     def readReady()->None:
         print('readReady')
         print(self.file.readAll())
