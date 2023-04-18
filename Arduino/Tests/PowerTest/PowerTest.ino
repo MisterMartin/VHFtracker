@@ -15,7 +15,7 @@
 //#define TRACKER_REVA
 #define TRACKER_REVB
 
-#define FLIGHT_NUM "POW_"             // MUST be 4 numeric characters, .e.g. "1030"
+#define FLIGHT_NUM "POWR"             // MUST be 4 numeric characters, .e.g. "1030"
 #define PING_ID     02                // Ping ID (0-255) sent for ping ID byte (should be last two digits of the flight number)
 
 // HIBERNATE parameters 
@@ -202,7 +202,7 @@ void loop()
   // Loop through different modes. A long hibernation 
   // occurs at the end of the sequence
 
-    blink(1);
+    blink(4);
 
     hibernate(20);
     Output_Ping_tone(40, 255);   // Send tone

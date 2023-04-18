@@ -16,7 +16,7 @@
 //#define TRACKER_REVA
 #define TRACKER_REVB
 
-#define FLIGHT_NUM "PNG_"             // MUST be 4 numeric characters, .e.g. "1030"
+#define FLIGHT_NUM "PING"             // MUST be 4 numeric characters, .e.g. "1030"
 #define PING_ID     03                // Ping ID (0-255) sent for ping ID byte (should be last two digits of the flight number)
 
 // HIBERNATE parameters 

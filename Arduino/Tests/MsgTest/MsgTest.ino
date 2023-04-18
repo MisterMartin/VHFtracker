@@ -38,7 +38,7 @@
 #define TRACKER_REVB
 
 //                                    // Set FLIGHT_NUM to the unit number, for logging purposes.
-#define FLIGHT_NUM "MSG_"             // ***MUST*** be 4 numeric characters, .e.g. "T402"
+#define FLIGHT_NUM "MESG"             // ***MUST*** be 4 numeric characters, .e.g. "T402"
 #define PING_ID     01                // Ping ID (0-255) sent for ping ID byte (should be last two digits of the flight number)
 
 // HIBERNATE parameters 
