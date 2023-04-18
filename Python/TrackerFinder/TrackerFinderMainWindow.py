@@ -1,8 +1,9 @@
 import sys
 from datetime import datetime
-from PyQt5.QtWidgets import QApplication, QMainWindow, QMessageBox, QDesktopWidget
+from PyQt5.QtWidgets import QApplication, QMainWindow, QMessageBox, QDesktopWidget, QHBoxLayout, QSizePolicy
 from PyQt5.QtCore import QTimer, QIODevice, pyqtSignal
 from Ui_TrackerFinderMainWindow import Ui_TrackerFinderMainWindow
+from DigitalClock import DigitalClock
 
 class TrackerFinderMainWindow(QMainWindow, Ui_TrackerFinderMainWindow):
 
@@ -13,6 +14,11 @@ class TrackerFinderMainWindow(QMainWindow, Ui_TrackerFinderMainWindow):
         super().__init__()
         self.setupUi(self)
         self.setWindowTitle('TrackerFinder')
+        clock = DigitalClock(self.clockFrame)
+        layout = QHBoxLayout()
+        self.clockFrame.setLayout(layout)
+        layout.addWidget(clock)
+
 
     def aprsMsg(self, msg:dict)->None:
         self.aprsTag.setText(msg['tag'])
