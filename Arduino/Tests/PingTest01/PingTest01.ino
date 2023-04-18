@@ -2,6 +2,15 @@
 // *** Compile at 24Mhz to minimize power consumption
 
 //*************************************************************************
+//
+// Use this program to test a tracker sending just encoded ping messages.
+// It will send the following messages:
+// HEL
+// repeat:
+//     wait 10 seconds
+//     PING
+
+//*************************************************************************
 //             Configuration
 // Tracker model. One or the other must be defined.
 //#define TRACKER_REVA
@@ -340,7 +349,9 @@ void Update_Ping_Array(void)
 void EncodedPing(void)
 {
  uint8_t buf[128];
-   
+
+  digitalWrite(V_TX_SHUTDOWN, HIGH);  // Turn on 5V DC-DC converter for Radiometrix
+
   // Use the AX.25 library to build the string to send 
   ax25_initBuffer(buf, 128);    // initialize a buffer to hold the built up string
 
@@ -357,6 +368,8 @@ void EncodedPing(void)
   afsk_set_buffer(buf,ax25_getPacketSize());  // send the AX.25 buffer to the AFSK que
   afsk_start();                               // send it
   while(afsk_busy());                         // wait for the send to complete
+
+  digitalWrite(V_TX_SHUTDOWN, LOW);   // Turn off 5V DC-DC converter for Radiometrix 
 }
 
 //************************************************************************************************

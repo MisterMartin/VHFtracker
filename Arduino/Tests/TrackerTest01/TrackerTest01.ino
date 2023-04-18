@@ -2,12 +2,10 @@
 // *** Compile at 24Mhz to minimize power consumption
 
 //*************************************************************************
-//             Configuration
-// Tracker model. One or the other must be defined.
-//#define TRACKER_REVA
-#define TRACKER_REVB
-
-// Use this program to test a tracker with a normal sequence of messages, but sent at a faster rate.
+//
+// Use this program to test a tracker with a normal sequence of messages, 
+// sent at a faster rate.
+//
 // It will send the following messages:
 //    HEL
 //    wait up to 2 minutes for GPS
@@ -32,6 +30,12 @@
 //      TONE, wait 15s
 //      TONE, wait 15s
 //      TONE, wait 15s
+
+//*************************************************************************
+//             Configuration
+// Tracker model. One or the other must be defined.
+//#define TRACKER_REVA
+#define TRACKER_REVB
 
 //                                    // Set FLIGHT_NUM to the unit number, for logging purposes.
 #define FLIGHT_NUM "TST1"             // ***MUST*** be 4 numeric characters, .e.g. "T402"
@@ -474,6 +478,8 @@ void EncodedPing(void)
 {
  uint8_t buf[128];
    
+  digitalWrite(V_TX_SHUTDOWN, HIGH);  // Turn on 5V DC-DC converter for Radiometrix
+
   // Use the AX.25 library to build the string to send 
   ax25_initBuffer(buf, 128);    // initialize a buffer to hold the built up string
 
@@ -490,6 +496,8 @@ void EncodedPing(void)
   afsk_set_buffer(buf,ax25_getPacketSize());  // send the AX.25 buffer to the AFSK que
   afsk_start();                               // send it
   while(afsk_busy());                         // wait for the send to complete
+
+  digitalWrite(V_TX_SHUTDOWN, LOW);   // Turn off 5V DC-DC converter for Radiometrix 
 }
 
 //************************************************************************************************

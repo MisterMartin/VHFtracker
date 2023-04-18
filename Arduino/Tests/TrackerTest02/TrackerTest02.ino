@@ -2,6 +2,14 @@
 // *** Compile at 24Mhz to minimize power consumption
 
 //*************************************************************************
+//
+// This program can be used to get an idea of the power consumption
+// during the various operating modes. The cycle times have been shortened,
+// and in some cases the pwr on times lengthened. You can get a reasonable
+// idea of the max current using the multimeter; it agrees well with the
+// power budget spreadsheet.
+//
+//*************************************************************************
 //             Configuration
 // Tracker model. One or the other must be defined.
 //#define TRACKER_REVA
@@ -349,8 +357,10 @@ void Update_Ping_Array(void)
 //
 void EncodedPing(void)
 {
- uint8_t buf[128];
+  uint8_t buf[128];
    
+  digitalWrite(V_TX_SHUTDOWN, HIGH);  // Turn on 5V DC-DC converter for Radiometrix
+
   // Use the AX.25 library to build the string to send 
   ax25_initBuffer(buf, 128);    // initialize a buffer to hold the built up string
 
@@ -367,6 +377,8 @@ void EncodedPing(void)
   afsk_set_buffer(buf,ax25_getPacketSize());  // send the AX.25 buffer to the AFSK que
   afsk_start();                               // send it
   while(afsk_busy());                         // wait for the send to complete
+
+  digitalWrite(V_TX_SHUTDOWN, LOW);   // Turn off 5V DC-DC converter for Radiometrix 
 }
 
 //************************************************************************************************
