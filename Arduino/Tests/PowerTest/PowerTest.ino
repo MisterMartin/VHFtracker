@@ -3,43 +3,20 @@
 
 //*************************************************************************
 //
-// Use this program to test a tracker with a normal sequence of messages, 
-// sent at a faster rate.
+// This program can be used to get an idea of the power consumption
+// during the various operating modes. The cycle times have been shortened,
+// and in some cases the pwr on times lengthened. You can get a reasonable
+// idea of the max current using the multimeter; it agrees well with the
+// power budget spreadsheet.
 //
-// It will send the following messages:
-//    HEL
-//    wait up to 2 minutes for GPS
-//    PRE 
-//    wait up to 2 minutes for GPS
-//    PRE 
-//    FLT
-//.   get GPS for 1 minute
-//    HIB
-//    hibertnate for 20 seconds
-//    wait up to 10 seconds for GPS
-//    Repeating:
-//      TRK,  wait 15s
-//      TONE, wait 15s
-//      TONE, wait 15s
-//      TONE, wait 15s
-//      PING, wait 15s
-//      TONE, wait 15s
-//      TONE, wait 15s
-//      TONE, wait 15s
-//      PING, wait 15s
-//      TONE, wait 15s
-//      TONE, wait 15s
-//      TONE, wait 15s
-
 //*************************************************************************
 //             Configuration
 // Tracker model. One or the other must be defined.
 //#define TRACKER_REVA
 #define TRACKER_REVB
 
-//                                    // Set FLIGHT_NUM to the unit number, for logging purposes.
-#define FLIGHT_NUM "TST1"             // ***MUST*** be 4 numeric characters, .e.g. "T402"
-#define PING_ID     98                // Ping ID (0-255) sent for ping ID byte (should be last two digits of the flight number)
+#define FLIGHT_NUM "POW_"             // MUST be 4 numeric characters, .e.g. "1030"
+#define PING_ID     02                // Ping ID (0-255) sent for ping ID byte (should be last two digits of the flight number)
 
 // HIBERNATE parameters 
 #define HIBERNATE_PERIOD         2     // Will Hibernate for 2 * 10s
@@ -54,7 +31,7 @@
 
 // TRACK mode parameters
 #define TRACK_GPS_PERIOD         24   // (Default 24) How often to look for a GPS position (hours)
-#define TRACK_APRS_TX_PERIOD     3    // (Default 10) How often to send APRS position message (minutes)
+#define TRACK_APRS_TX_PERIOD     2    // (Default 10) How often to send APRS position message (minutes)
 #define TRACK_PING_TX_PERIOD     15   // (Default 15) How often to send a Ping (seconds)
 //*************************************************************************
 
@@ -173,10 +150,7 @@ void setup()
   Serial.println(__FILE__);
   Serial.print("Build time: ");
   Serial.print(__TIMESTAMP__);
-  Serial.print(", ");
-  Serial.print("Flight ");
-  Serial.print(FLIGHT_NUM);
-  Serial.print(", ");
+  Serial.print(" ");
   Serial.println(board_revision);
 
   /* GPS Setup */
@@ -194,16 +168,7 @@ void setup()
    analogWriteResolution(12);
    analogReference(INTERNAL);
 
-// Blink 5 times on power up so we know it is working */
-  for (int i = 0; i < 5 ; i++)
-  {
-    digitalWrite(LED_BUILTIN, HIGH);
-    delay(200);
-    digitalWrite(LED_BUILTIN, LOW);
-    delay(200);
-  }
-  
-// Set up the APRS code
+  // Set up the APRS code
   aprs_setup(
        10,              // Send 10 APRS preamble flags (this is a WAG, but if needed can be longer to help TH-D74 sync), must be at least 2
        TX_ENABLE,       // Use PTT pin
@@ -211,131 +176,47 @@ void setup()
        0, 0             // No VOX ton
        );
   
-  broadcastLocation(HEL_MSG);   // Send hello APRS message to the TH-D74 Tracker radio
 }
 
 //************************************************************************************************
 //************************************************************************************************
+
+void hibernate(int secs) {
+    alarm.setRtcTimer(0, 0, secs);        // hour, min, sec
+    Snooze.hibernate( config_teensy36 );
+}
+
+void blink(int n) {
+    for (int i = 0; i < n ; i++)
+    {
+        digitalWrite(LED_BUILTIN, HIGH);
+        delay(200);
+        digitalWrite(LED_BUILTIN, LOW);
+        delay(200);
+    }
+}
+
 void loop()
 {
-   //---------------------------------------------------------------------------------------------  
-   // PREFLIGHT Mode: Only sends APRS positions, no pings. Attempts to update GPS position for every APRS packet sent
-   //
-   if (mode == PREFLIGHT) 
-   {
-      if (Preflight_APRS_packets < MAX_PREFLIGHT_PACKETS)     // Preflight mode will run for (MAX_PREFLIGHT_PACKETS)*(PREFLIGHT_APRS_TX_PERIOD) (in seconds)
-        {        
-         getGPS(120,GPS_PWR_OFF);            // try for 2 minutes to get a GPS Position, turn GPS PWR off when done
-         broadcastLocation(PRE_MSG);         // Send the location by APRS
-         Preflight_APRS_packets++;        
-         alarm.setRtcTimer(0, 0, 10);    // hour, min, sec
-         Snooze.hibernate( config_teensy36 );
-        }
-      else
-        {
-         broadcastLocation(FLT_MSG);   // Send "FLT_MODE" APRS message to the TH-D74 Tracker radio
-         Ping_Array[1] = 0;               // Reset the counter that tracks the number of invalid GPS fixes
-         APRS_XMIT_count = 0;             // Reset APRS message sent counter when changing modes
-         mode = FLIGHT;                   // Go to FLIGHT mode when Preflight mode is completed
-        }   
-   }   
 
-   //---------------------------------------------------------------------------------------------
-   // FLIGHT MODE: Acquires and stores GPS postions only, No APRS messages or pings sent
-   //              Stays in flight mode for FLIGHT_TIME (units: minutes)
-   //
-     if (mode == FLIGHT)
-      {
-        StartTime = millis();
-            
-        while (millis()-StartTime < MaxTime)    // continously update the GPS position while in FLIGHT mode
-         {
-          getGPS(10,GPS_PWR_ON);               // try for 2 minutes to get a GPS Position, Leave GPS PWR ON
-         }                                                   
-      
-        digitalWrite(V_GPS_SHUTDOWN, LOW);      // Always turn off GPS Power when leaving FLIGHT mode
-        broadcastLocation(HIB_MSG);             // Send "HIB_MODE" APRS message to the TH-D74 Tracker radio
-        Ping_Array[1] = 0;                      // Reset the counter that tracks the number of invalid GPS fixes
-        APRS_XMIT_count = 0;                    // Reset APRS message sent counter when changing modes
-        mode = HIBERNATE;                       // Go to HIBERNATE mode when flight mode is completed
-      } 
+  // Loop through different modes. A long hibernation 
+  // occurs at the end of the sequence
 
-  //---------------------------------------------------------------------------------------------
-  // HIBERNATE MODE: Wakes up once per day to increment the days in hibernate counter
-  //                 Gets a GPS postion when the hibernate period is complete
-  //
-  //    Hibernation function: alarm.setRtcTimer(Hours, minutes, seconds)
-  //
-  if (mode == HIBERNATE) 
-   {
-      if (Hibernate_day < HIBERNATE_PERIOD)      // stay in Hibernate until hibernate period is complete
-        {
-         alarm.setRtcTimer(0, 0, 10);            // Set Timer to 0 hours, 0 minutes, 10 seconds to go to sleep for 10 seconds
-         Snooze.hibernate( config_teensy36 );
-         Hibernate_day ++;                       // number of days in hibernate   
-        }
-       else
-        {
-         getGPS(10,GPS_PWR_OFF);          // try for 5 minutes to get a GPS Position                                                             
-         broadcastLocation(TRK_MSG);      // Send "TRK_MODE" APRS message to the TH-D74 Tracker radio
-         APRS_XMIT_count = 0;             // Reset APRS message sent counter when changing modes
-         mode = TRACK;                    // Go to TRACK mode when hibernate period completed    
-        }  
-   }
+    blink(1);
 
-   //---------------------------------------------------------------------------------------------
-   // TRACK MODE: Updates GPS position and sends APRS message every TRACK_GPS_PERIOD (hours)
-   //             Sends APRS message every TRACK_APRS_TX_PERIOD (minutes)
-   //             Sends pings every TRACK_PING_TX_PERIOD (seconds)
-   //
-   if (mode == TRACK) 
-   {
-     if((pings_sent*TRACK_PING_TX_PERIOD) >= TRACK_APRS_TX_PERIOD * 60)      // if it is time, send an APRS message   
-       {
-          if(track_APRS_packets * TRACK_APRS_TX_PERIOD >= TRACK_GPS_PERIOD * 60)     // If it is time, update the GPS position 
-            {
-              getGPS(10,GPS_PWR_OFF);       // try for 10 seconds to get a GPS Position
-              broadcastLocation(TRK_GPS);   // Send the new GPS location by APRS and indicate a GPS cycle
-              track_APRS_packets = 1;       // Reset track_APRS_packets counter after the GPS position has been updated
-            }
-          else
-            {
-              broadcastLocation(TRK_MSG);  // Send the existing GPS location by APRS and indicate a TRK cycle
-              track_APRS_packets++;        // increment the counter that keeps track of the number of APRS messages sent               
-            }   
-          pings_sent = 1;                  // Reset ping counter after every APRS meesage
-          ping_state = 0;                  // first ping after any APRS message is a tone
-       }
-      else                          // Send a Ping if no APRS message was sent
-       {
-         pings_sent++;              // increment the counter for number of pings sent
-         
-         switch (ping_state)        // send three tone and one encoded GPS pings for every TRACK_PING_TX_PERIOD
-          {                            
-            case 0:
-              Output_Ping_tone(11,53);  // 704 Hz tone for 75 msec
-              ping_state++;             // goto next state
-              break;
-            case 1:
-              Output_Ping_tone(11,53);  // 704 Hz tone for 75 msec
-              ping_state++;             // goto next state
-              break; 
-            case 2:
-              Output_Ping_tone(11,53);  // 704 Hz tone for 75 msec
-              ping_state++;             // goto next state
-              break;        
-            case 3:
-              EncodedPing();            // Send encoded GPS position track ping     
-              ping_state = 0;           // goto state 0
-              break;                               
-            default: 
-              ping_state = 0;       // goto state 0 (should never get here)
-              break;
-          }       
-       }        
-     alarm.setRtcTimer(0, 0, TRACK_PING_TX_PERIOD);       // hour, min, sec go back to sleep until the next ping
-     Snooze.hibernate( config_teensy36 );
-   }
+    hibernate(20);
+    Output_Ping_tone(40, 255);   // Send tone
+
+    hibernate(20);
+    getGPS(10,GPS_PWR_OFF);     // Read GPS
+
+    hibernate(20);
+    broadcastLocation(HEL_MSG); // Send APRS
+
+    hibernate(20);
+    EncodedPing();               // Send ping position
+
+    hibernate(20);
 }
 
 //************************************************************************************************
@@ -476,7 +357,7 @@ void Update_Ping_Array(void)
 //
 void EncodedPing(void)
 {
- uint8_t buf[128];
+  uint8_t buf[128];
    
   digitalWrite(V_TX_SHUTDOWN, HIGH);  // Turn on 5V DC-DC converter for Radiometrix
 

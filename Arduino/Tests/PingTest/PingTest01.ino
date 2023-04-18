@@ -3,20 +3,21 @@
 
 //*************************************************************************
 //
-// This program can be used to get an idea of the power consumption
-// during the various operating modes. The cycle times have been shortened,
-// and in some cases the pwr on times lengthened. You can get a reasonable
-// idea of the max current using the multimeter; it agrees well with the
-// power budget spreadsheet.
-//
+// Use this program to test a tracker sending just encoded ping messages.
+// It will send the following messages:
+// HEL
+// repeat:
+//     wait 10 seconds
+//     PING
+
 //*************************************************************************
 //             Configuration
 // Tracker model. One or the other must be defined.
 //#define TRACKER_REVA
 #define TRACKER_REVB
 
-#define FLIGHT_NUM "TST2"             // MUST be 4 numeric characters, .e.g. "1030"
-#define PING_ID     99                // Ping ID (0-255) sent for ping ID byte (should be last two digits of the flight number)
+#define FLIGHT_NUM "PNG_"             // MUST be 4 numeric characters, .e.g. "1030"
+#define PING_ID     03                // Ping ID (0-255) sent for ping ID byte (should be last two digits of the flight number)
 
 // HIBERNATE parameters 
 #define HIBERNATE_PERIOD         2     // Will Hibernate for 2 * 10s
@@ -176,6 +177,11 @@ void setup()
        0, 0             // No VOX ton
        );
   
+    blink(3);
+
+    // Say hello
+    broadcastLocation(HEL_MSG); // Send APRS
+
 }
 
 //************************************************************************************************
@@ -198,25 +204,10 @@ void blink(int n) {
 
 void loop()
 {
+    
+    hibernate(10);
 
-  // Loop through different modes. A long hibernation 
-  // occurs at the end of the sequence
-
-    blink(1);
-
-    hibernate(20);
-    Output_Ping_tone(40, 255);   // Send tone
-
-    hibernate(20);
-    getGPS(10,GPS_PWR_OFF);     // Read GPS
-
-    hibernate(20);
-    broadcastLocation(HEL_MSG); // Send APRS
-
-    hibernate(20);
     EncodedPing();               // Send ping position
-
-    hibernate(20);
 }
 
 //************************************************************************************************
@@ -357,8 +348,8 @@ void Update_Ping_Array(void)
 //
 void EncodedPing(void)
 {
-  uint8_t buf[128];
-   
+ uint8_t buf[128];
+
   digitalWrite(V_TX_SHUTDOWN, HIGH);  // Turn on 5V DC-DC converter for Radiometrix
 
   // Use the AX.25 library to build the string to send 
