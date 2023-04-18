@@ -196,8 +196,9 @@ void blink(int n) {
 void loop()
 {
     
+    hibernate(10);
+
     EncodedPing();               // Send ping position
-    hibernate(20);
 }
 
 //************************************************************************************************
