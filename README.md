@@ -23,7 +23,6 @@ sketch is used to select the targeted board.
 | 30_GPS_PWR_EN  | 36_GPS_PWR_EN   |    30*  |    36*  |       |
 | 31_GPS_EXTINT  |                 |    31   |         | How is this handled for Rev B? |
 | 32_GPS_RST     |                 |    32   |         | How is this handled for Rev B? |
-| A21_TX_AUDIO   |                 |     ?   |  (same) |       |
 
 \* = signals that must be (re)defined based on the board revision.
 ## Arduino IDE
@@ -38,3 +37,22 @@ sketch is used to select the targeted board.
   IDE multiple times. It finally read the URL and provided the Teensy in the boards list.
   Perhaps the issue was due to the slow Internet access from McMurdo.
 
+## Tracker Code
+
+- It turned out that the +5V control was not being used for the encoded ping. For Rev A,
+  the ping was working because although the 5V shutdown was disabling the 5V regulator,
+  power was still available to the op amp via a bypass diode. The switch that was added
+  in Rev B prevented this, and the ping was not working. Once the code was corrected,
+  the ping started working.
+
+## Batteries
+
+- In the 2019 deployment, a couple of the trackers failed because the commercial battery
+  holders were breaking during landing impact. New holders were designed and fabricated on
+  the 3d printer. Three designs were created and printed:
+    - For Rev A: a single D cell holder for a battery with welded tabs. Hot glue holds the
+      battery in at the open end.
+    - For Rev B: a holder for 4 AA cells, with open ends for batteries with soldered/welded
+      connections. Our batteries would not take solder, so these wer not used.
+    - For Rev B: a holder for 4 AA cells, with no openings. Salvaged steel strips were used
+      to make contacts. This design was flown.
