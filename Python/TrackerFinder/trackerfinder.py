@@ -1,6 +1,7 @@
 import sys
+import os
 import signal
-from argparse import ArgumentParser
+from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtCore import QTimer
 from TrackerAX25 import TrackerAX25
@@ -30,7 +31,19 @@ if __name__ == "__main__":
     import sys
 
     def parseArgs() -> dict:
-        parser = ArgumentParser()
+        description = '''
+        Capture AX25 messages sent by a LASP VHF tracker. The two Tracker message
+        types, APRS and position encoded pings, are decoded. Raw and decoded messages
+        are logged to .raw and .log files.
+        '''
+        epilog = '''
+        The messages are typically delivered via the KISS APRS link over Bluetooth,
+        from a handheld radio. The operating system serial device name is likely to be
+        different than the default values provided here. Use system tools to determine the
+        serial port device name when connected to the Bluetooth device.
+        '''
+        parser = ArgumentParser(description=description, epilog=epilog,
+        formatter_class=ArgumentDefaultsHelpFormatter)
 
         if sys.platform == 'win32':
             parser.add_argument("-d", "--device", help="APRS device",
@@ -38,9 +51,15 @@ if __name__ == "__main__":
         else:
             parser.add_argument("-d", "--device", help="APRS device",
                     action="store", default='/dev/tty.TH-D74')
+        parser.add_argument('-l', '--location', help="Location of the log files", action="store", 
+            default=os.path.expanduser("~/"))
 
-        return parser.parse_args()
+        args = parser.parse_args()
+        args.location = os.path.abspath(args.location)
 
+        return args
+
+    # Get the argumewnts
     args = parseArgs()
 
     app = QApplication(sys.argv)
@@ -48,24 +67,23 @@ if __name__ == "__main__":
     # Create the main window
     mainWindow = TrackerFinderMainWindow()
     mainWindow.closeSignal.connect(closeApp)
-    mainWindow.setStatus(f'Device: {args.device}')
+    mainWindow.setStatus(f'Device: {args.device}, Log dir:{args.location}')
     mainWindow.show()
 
     # Create and start the ax25 reader thread.
     trackerAx25 = TrackerAX25(device=args.device)
     trackerAx25.aprsSignal.connect(mainWindow.aprsMsg)
-    trackerAx25.posPingSignal.connect(mainWindow.pingMsg)
-    trackerAx25.logSignal.connect(mainWindow.addToLog)
+    trackerAx25.encodedPingSignal.connect(mainWindow.pingMsg)
+    trackerAx25.logSignal.connect(mainWindow.addToLogWidget)
     trackerAx25.start()
 
-    # Create the logger
-    # Will create a .raw and .log file
-    logger = Logger("TrackerFinder")
+    # Create the logger. Will create/append a .raw and .log file
+    logger = Logger(location=args.location, fileName="TrackerFinder")
     trackerAx25.logSignal.connect(logger.log)
     trackerAx25.rawSignal.connect(logger.raw)
     logger.log('--- TrackerFinder Started ---')
 
-    mainWindow.addToLog('--- TrackerFinder Started ---')
+    mainWindow.addToLogWidget('--- TrackerFinder Started ---')
     # Catch SIG_INT
     signal.signal(signal.SIGINT, sigint_handler)
 
