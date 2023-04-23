@@ -20,10 +20,10 @@ class Logger:
         """
 
         datestamp = datetime.now().strftime('%Y-%m-%d')
-        fname = f'{location}/{datestamp}-{fileName}'
+        self.fname = f'{location}/{datestamp}-{fileName}'
 
-        self.textFile = open(f'{fname}.log', 'a')
-        self.rawFile = open(f'{fname}.raw', 'ab')
+        self.textFile = open(f'{self.fname}.log', 'a')
+        self.rawFile = open(f'{self.fname}.raw', 'ab')
 
     def log(self, text:str)->None:
         """Write text to the .log file."""
@@ -37,3 +37,6 @@ class Logger:
 
         self.rawFile.write(rawData)
         self.rawFile.flush()
+
+    def logFilePath(self)->str:
+        return self.fname + '.log'

@@ -67,7 +67,6 @@ if __name__ == "__main__":
     # Create the main window
     mainWindow = TrackerFinderMainWindow()
     mainWindow.closeSignal.connect(closeApp)
-    mainWindow.setStatus(f'Device: {args.device}, Log dir:{args.location}')
     mainWindow.show()
 
     # Create and start the ax25 reader thread.
@@ -82,6 +81,8 @@ if __name__ == "__main__":
     trackerAx25.logSignal.connect(logger.log)
     trackerAx25.rawSignal.connect(logger.raw)
     logger.log('--- TrackerFinder Started ---')
+    mainWindow.setStatus(f'Device: {args.device}, Log file:{logger.logFilePath()}')
+
 
     mainWindow.addToLogWidget('--- TrackerFinder Started ---')
     # Catch SIG_INT
