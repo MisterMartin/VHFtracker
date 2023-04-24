@@ -4,8 +4,8 @@
 //*************************************************************************
 //             Configuration
 // Tracker model. One or the other must be defined.
-//#define TRACKER_REVA
-#define TRACKER_REVB
+#define TRACKER_REVA
+//#define TRACKER_REVB
 
 #define FLIGHT_NUM "1045"             // MUST be 4 numeric characters, .e.g. "1030"
 #define PING_ID    45                 // Ping ID (0-255) sent for ping ID byte (should be last two digits of the flight number)
@@ -18,8 +18,8 @@
 // FLIGHT mode parameters
 #define FLIGHT_TIME 120               // (Default 120) How many minutes to remain in Flight Mode
 
-// HIBERNATE parameters --- Launch Date: 21 April 2023 (JD 111), Wake Up Date: 01 Nov 2023 (JD 305)-----------
-#define HIBERNATE_PERIOD        194   // Will Hibernate for 194 days
+// HIBERNATE parameters --- Launch Date: 25 April 2023 (JD 115), Wake Up Date: 01 Nov 2023 (JD 305)-----------
+#define HIBERNATE_PERIOD        190   // Will Hibernate for 190 days
 
 // TRACK mode parameters
 #define TRACK_GPS_PERIOD         24   // (Default 24) How often to look for a GPS position (hours)
